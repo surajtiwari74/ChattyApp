@@ -9,7 +9,7 @@ const SendInput = () => {
     const dispatch = useDispatch();
     const {selectedUser} = useSelector(store=>store.user);
     const {messages} = useSelector(store=>store.message);
-
+  
     const onSubmitHandler = async (e) => {
         e.preventDefault();
         try {
@@ -19,6 +19,7 @@ const SendInput = () => {
                 },
                 withCredentials:true
             });
+        
             dispatch(setMessages([...messages, res?.data?.newMessage]))
         } catch (error) {
             console.log(error);

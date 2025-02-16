@@ -3,10 +3,27 @@ import { useSelector } from "react-redux";
 
 const Message = ({ message }) => {
   const { authUser, selectedUser } = useSelector((store) => store.user);
-  const date = new Date(message?.createdAt);
   const scroll = useRef();
 
-  // Extract time (HH:MM)
+  useEffect(() => {
+    if (scroll.current) {
+      scroll.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [message]);
+
+  if (!selectedUser) {
+    return <></>; // Render an empty fragment instead of returning early
+  }
+
+  // Ensure messages belong to the selected user
+  if (
+    message?.senderId !== selectedUser?._id &&
+    message?.receiverId !== selectedUser?._id
+  ) {
+    return null; // Don't render messages from other users
+  }
+
+  const date = new Date(message?.createdAt);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const timeOnly = `${hours}:${minutes}`;
@@ -24,9 +41,7 @@ const Message = ({ message }) => {
   } else {
     displayTime = `${date.toLocaleDateString()}, ${timeOnly}`;
   }
-  useEffect(()=>{
-    scroll.current?.scrollIntoView({behavior:"smooth"});
-},[message]);
+
   return (
     <div
       ref={scroll}
@@ -35,9 +50,9 @@ const Message = ({ message }) => {
       }`}
     >
       {/* Profile Image (Left Side for Other Users) */}
-      {message?.senderId !== authUser?._id && (
+      {message?.senderId !== authUser?._id && selectedUser?.profilePhoto && (
         <div className="w-10 h-10 rounded-full overflow-hidden">
-          <img src={selectedUser?.profilePhoto} alt="User Profile" />
+          <img src={selectedUser.profilePhoto} alt="User Profile" />
         </div>
       )}
 
@@ -59,9 +74,9 @@ const Message = ({ message }) => {
       </div>
 
       {/* Profile Image (Right Side for Auth User) */}
-      {message?.senderId === authUser?._id && (
+      {message?.senderId === authUser?._id && authUser?.profilePhoto && (
         <div className="w-10 h-10 rounded-full overflow-hidden">
-          <img src={authUser?.profilePhoto} alt="Your Profile" />
+          <img src={authUser.profilePhoto} alt="Your Profile" />
         </div>
       )}
     </div>
